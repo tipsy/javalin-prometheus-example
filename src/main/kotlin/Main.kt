@@ -1,7 +1,6 @@
 import com.mashape.unirest.http.Unirest
-import io.javalin.ApiBuilder.get
 import io.javalin.Javalin
-import io.javalin.embeddedserver.jetty.EmbeddedJettyFactory
+import io.javalin.apibuilder.ApiBuilder.get
 import io.prometheus.client.exporter.HTTPServer
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.StatisticsHandler
@@ -15,11 +14,11 @@ fun main(args: Array<String>) {
 
     val app = Javalin.create().apply {
         port(7070)
-        embeddedServer(EmbeddedJettyFactory {
+        server {
             Server(queuedThreadPool).apply {
                 handler = statisticsHandler
             }
-        })
+        }
     }.start()
 
     app.routes {

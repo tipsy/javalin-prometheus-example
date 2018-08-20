@@ -1,14 +1,13 @@
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import io.javalin.Javalin;
-import io.javalin.embeddedserver.jetty.EmbeddedJettyFactory;
 import io.prometheus.client.exporter.HTTPServer;
 import java.io.IOException;
 import java.util.Random;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.StatisticsHandler;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
-import static io.javalin.ApiBuilder.get;
+import static io.javalin.apibuilder.ApiBuilder.get;
 
 public class Main {
 
@@ -20,11 +19,11 @@ public class Main {
 
         Javalin app = Javalin.create()
             .port(7070)
-            .embeddedServer(new EmbeddedJettyFactory(() -> {
+            .server(() -> {
                 Server server = new Server(queuedThreadPool);
                 server.setHandler(statisticsHandler);
                 return server;
-            }))
+            })
             .start();
 
         app.routes(() -> {
