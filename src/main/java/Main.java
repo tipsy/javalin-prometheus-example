@@ -7,6 +7,7 @@ import java.util.Random;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.StatisticsHandler;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.slf4j.LoggerFactory;
 import static io.javalin.apibuilder.ApiBuilder.get;
 
 public class Main {
@@ -15,16 +16,16 @@ public class Main {
 
         StatisticsHandler statisticsHandler = new StatisticsHandler();
         QueuedThreadPool queuedThreadPool = new QueuedThreadPool(200, 8, 60_000);
-        initializePrometheus(statisticsHandler, queuedThreadPool);
 
         Javalin app = Javalin.create()
-            .port(7070)
             .server(() -> {
                 Server server = new Server(queuedThreadPool);
                 server.setHandler(statisticsHandler);
                 return server;
             })
-            .start();
+            .start(7070);
+
+        initializePrometheus(statisticsHandler, queuedThreadPool);
 
         app.routes(() -> {
             get("/1", ctx -> ctx.result("Hello World"));
@@ -47,6 +48,7 @@ public class Main {
         StatisticsHandlerCollector.initialize(statisticsHandler);
         QueuedThreadPoolCollector.initialize(queuedThreadPool);
         HTTPServer prometheusServer = new HTTPServer(7080);
+        LoggerFactory.getLogger("Main").info("Prometheus is listening on: http://localhost:7080");
     }
 
     private static void spawnRandomRequests() throws InterruptedException {

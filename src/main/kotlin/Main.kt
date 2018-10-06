@@ -1,25 +1,27 @@
 import com.mashape.unirest.http.Unirest
+import com.sun.media.jfxmedia.logging.Logger
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.get
 import io.prometheus.client.exporter.HTTPServer
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.util.thread.QueuedThreadPool
+import org.slf4j.LoggerFactory
 
 fun main(args: Array<String>) {
 
     val statisticsHandler = StatisticsHandler()
     val queuedThreadPool = QueuedThreadPool(200, 8, 60_000)
-    initializePrometheus(statisticsHandler, queuedThreadPool)
 
     val app = Javalin.create().apply {
-        port(7070)
         server {
             Server(queuedThreadPool).apply {
                 handler = statisticsHandler
             }
         }
-    }.start()
+    }.start(7070)
+
+    initializePrometheus(statisticsHandler, queuedThreadPool)
 
     app.routes {
         get("/1") { ctx -> ctx.result("Hello World") }
@@ -42,6 +44,8 @@ private fun initializePrometheus(statisticsHandler: StatisticsHandler, queuedThr
     StatisticsHandlerCollector.initialize(statisticsHandler)
     QueuedThreadPoolCollector.initialize(queuedThreadPool)
     val prometheusServer = HTTPServer(7080)
+    LoggerFactory.getLogger("Main").info("Prometheus is listening on: http://localhost:7080")
+
 }
 
 private fun spawnRandomRequests() {
