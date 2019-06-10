@@ -8,13 +8,13 @@ import org.eclipse.jetty.server.handler.StatisticsHandler
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.slf4j.LoggerFactory
 
-fun main(args: Array<String>) {
+fun main() {
 
     val statisticsHandler = StatisticsHandler()
     val queuedThreadPool = QueuedThreadPool(200, 8, 60_000)
 
-    val app = Javalin.create().apply {
-        server {
+    val app = Javalin.create {
+        it.server {
             Server(queuedThreadPool).apply {
                 handler = statisticsHandler
             }
@@ -45,7 +45,6 @@ private fun initializePrometheus(statisticsHandler: StatisticsHandler, queuedThr
     QueuedThreadPoolCollector.initialize(queuedThreadPool)
     val prometheusServer = HTTPServer(7080)
     LoggerFactory.getLogger("Main").info("Prometheus is listening on: http://localhost:7080")
-
 }
 
 private fun spawnRandomRequests() {

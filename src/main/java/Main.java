@@ -17,13 +17,13 @@ public class Main {
         StatisticsHandler statisticsHandler = new StatisticsHandler();
         QueuedThreadPool queuedThreadPool = new QueuedThreadPool(200, 8, 60_000);
 
-        Javalin app = Javalin.create()
-            .server(() -> {
+        Javalin app = Javalin.create(config ->
+            config.server(() -> {
                 Server server = new Server(queuedThreadPool);
                 server.setHandler(statisticsHandler);
                 return server;
             })
-            .start(7070);
+        ).start(7070);
 
         initializePrometheus(statisticsHandler, queuedThreadPool);
 
